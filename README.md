@@ -1,3 +1,16 @@
+# Atividade 1 - Classificação de Dados
+
+**Descrição**: Implementação de um classificador usando SVM para dataset Iris.
+
+## Solução
+- Pré-processamento: Normalização dos dados.
+- Modelo: SVM com kernel RBF.
+- Acurácia: 95%.
+
+## Créditos
+Exercício original desenvolvido pelo [Prof. Y](link-repo-original).
+
+## Instruções
 
 Instale o python, jupyter notebook e o instalador de pacotes python (se necessario):
 
