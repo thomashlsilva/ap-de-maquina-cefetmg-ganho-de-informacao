@@ -1,5 +1,7 @@
 import pandas as pd
+import math
 from typing import Union
+from pandas.api.types import is_numeric_dtype, is_bool_dtype
 
 
 def entropia(df_dados:pd.DataFrame, nom_col_classe:str) -> float:
@@ -17,12 +19,12 @@ def entropia(df_dados:pd.DataFrame, nom_col_classe:str) -> float:
     entropia = 0
 
     #Navege em ser_count_col para fazer o calculo da entropia
-    for val_atr,count_atr in ser_count_col.items():
+    for val_atr, count_atr in ser_count_col.items():
         #altere os valores de val_prob e entropia para o calculo correto da mesma
         #val_prob deverá ser a proporção de instancias de uma determinada classe
         #caso tenha duvida sobre o iteritems e value_counts, consulte o passo a passo do pandas
-        val_prob = None
-        entropia += None
+        val_prob = count_atr/num_total
+        entropia += -val_prob*math.log2(val_prob)
     return entropia
 
 
@@ -43,12 +45,12 @@ def ganho_informacao_condicional(df_dados: pd.DataFrame, val_entropia_y:float, n
     #substitua os "None"/0 quando necessario para completar o código
     #.em df_dados_filtrado, filtre o df_dados da forma correta - pensando quais
     #elementos considerar na entropia condicional Entropia(Y|nom_atributo=val_atributo).
-    df_dados_filtrado = None
+    df_dados_filtrado = df_dados[df_dados[f"{nom_atributo}"]==val_atributo]
 
     #use df_dados_filtrado para obter o valor de Entropia(Y|nom_atributo=val_atributo)
-    val_ent_condicional = 0
+    val_ent_condicional = entropia(df_dados_filtrado, nom_col_classe)
     #use val_ent_condicional para calcular o GI(Y|nom_atributo=val_atributo)
-    val_gi = 0
+    val_gi = val_entropia_y - val_ent_condicional
 
     #para testes:
     #print(f"GI({nom_col_classe}| {nom_atributo}={val_atributo}) = {val_gi}")
@@ -72,16 +74,23 @@ def ganho_informacao(df_dados:pd.DataFrame, nom_col_classe:str, nom_atributo:str
 
     #atenção nessa linha abaixo, qual é o valor que temos que colocar em None?
     #o que precisamos contabilizar dessa vez?
-    ser_count_col = df_dados[None].value_counts()
 
-    val_entropia_y = None
+    val_entropia_y = entropia(df_dados, nom_col_classe)
 
     num_total = len(df_dados)
     val_info_gain = 0
-    for val_atr,count_atr in None:
-        val_prob = None
-        val_info_gain += None
 
-        #print(f"GI({nom_col_classe}| {nom_atributo}={val_atr}) = {val_info_gain}")
+    if(is_numeric_dtype(df_dados[nom_atributo]) == True or is_bool_dtype(df_dados[nom_atributo]) == True):
+            ser_count_col = df_dados[nom_atributo].value_counts(bins=3)
+            print("============")
+            print(ser_count_col)
+    else:
+        ser_count_col = df_dados[nom_atributo].value_counts()
+
+    for val_atr, count_atr in ser_count_col.items():
+        val_prob = count_atr/num_total
+        val_info_gain += val_prob*ganho_informacao_condicional(df_dados, val_entropia_y, nom_col_classe, nom_atributo, val_atr)
+
+        print(f"GI({nom_col_classe}| {nom_atributo}={val_atr}) = {val_info_gain}")
 
     return val_info_gain
